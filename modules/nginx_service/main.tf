@@ -44,7 +44,7 @@ resource "aws_ecs_task_definition" "nginx_task" {
 
 resource "aws_ecs_service" "nginx_service" {
   name            = "nginx-service"
-  cluster         = var
+  cluster         = module.ecs_cluster.cluster_id
   task_definition = aws_ecs_task_definition.nginx_task.arn
   launch_type     = "FARGATE"
   desired_count   = 1

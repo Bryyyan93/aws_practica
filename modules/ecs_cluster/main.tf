@@ -1,7 +1,7 @@
-resource "aws_ecs_cluster" "nginx_ecs_cluster" {
-  name = "nginx-cluster"
+resource "aws_ecs_cluster" "ecs_cluster" {
+  name = var.cluster_id 
 }
 
 output "cluster_id" {
-  value = aws_ecs_cluster.nginx_ecs_cluster.id
+  value = aws_ecs_cluster.ecs_cluster.id
 }

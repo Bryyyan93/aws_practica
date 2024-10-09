@@ -2,8 +2,11 @@ data "aws_vpc" "default" {
   default = true
 }
 
-data "aws_subnet_ids" "public_subnets" {
-  vpc_id = data.aws_vpc.default.id
+data "aws_subnets" "public_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
 }
 
 resource "aws_security_group" "ecs_sg" {
@@ -25,7 +28,7 @@ resource "aws_security_group" "ecs_sg" {
 }
 
 output "public_subnets" {
-  value = data.aws_subnet_ids.public_subnets.ids
+  value = data.aws_subnets.public_subnets.ids
 }
 
 output "vpc_id" {
