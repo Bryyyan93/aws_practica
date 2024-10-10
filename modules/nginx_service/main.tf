@@ -44,13 +44,15 @@ resource "aws_ecs_service" "nginx_service" {
     container_port   = 80
   }
 
+  depends_on = [aws_lb.nginx_alb]  # Agregar esta línea para asegurarse de que el ALB esté creado antes del ECS Service
+
   tags = var.tags
 }
 
 # Crear el balancedor de carga para gestionar el trafico
 resource "aws_lb" "nginx_alb" {
   name               = var.alb_name
-  internal           = false
+  internal           = true # Esto asegura que sea un ALB público
   load_balancer_type = "application"
   security_groups    = [var.alb_security_group_id]
   subnets            = var.subnets
