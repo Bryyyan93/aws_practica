@@ -34,3 +34,28 @@ module "ecs_cluster" {
     Enviroment = "dev"
   }
 }
+
+# 
+module "nginx_service" {
+  source                = "./modules/nginx_service"
+  cluster_id            = module.ecs_cluster.ecs_cluster_id
+  task_family           = "nginx-task-family"
+  cpu                   = 256
+  memory                = 512
+  container_cpu         = 256
+  container_memory      = 512
+  execution_role_arn    = aws_iam_role.ecsTaskExecutionRole.arn
+  task_role_arn         = aws_iam_role.ecsTaskRole.arn
+  service_name          = "nginx-service"
+  desired_count         = 2
+  subnets               = module.vpc.subnet_id
+  security_group_id     = module.security_group.security_group_id
+  alb_security_group_id = module.security_group.security_group_id
+  alb_name              = "nginx-alb"
+  target_group_name     = "nginx-target-group"
+  vpc_id                = module.vpc.vpc_id
+
+  tags = {
+    Environment = "dev"
+  }
+}
