@@ -9,10 +9,10 @@ variable "subnet_name" {
   default     = "kc-subnet-pf-bryan"
 }
 
-variable "availability_zone" {
+variable "availability_zones" {
   description = "List of Availability Zone"
-  type        = string
-  default     = "eu-west-1a"
+  type        = list(string)
+  default     = [ "eu-west-1a", "eu-west-1b", "eu-west-1c" ]
 }
 
 variable "sg_name" {

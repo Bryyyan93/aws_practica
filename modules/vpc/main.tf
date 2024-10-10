@@ -9,13 +9,14 @@ resource "aws_vpc" "this" {
 }
 
 resource "aws_subnet" "private_subnet" {
+  for_each = toset(var.availability_zones)  # Crea una subnet por cada zona de disponibilidad
   vpc_id                  = aws_vpc.this.id
-  cidr_block              = var.subnet_cidr
+  cidr_block              = cidrsubnet(var.vpc_cidr, 8, index(tolist(var.availability_zones), each.key))  # Usa un índice numérico basado en la lista de availability_zones
   map_public_ip_on_launch = false
-  availability_zone       = var.availability_zone
+  availability_zone       =  each.value #var.availability_zones # Usa each.value para la zona de disponibilidad
 
   tags = {
-    Name = var.subnet_name
+    Name = "${var.subnet_name}-${each.value}"
   }
 }
 
@@ -28,6 +29,7 @@ resource "aws_route_table" "private_route_table" {
 }
 
 resource "aws_route_table_association" "private_association" {
-  subnet_id      = aws_subnet.private_subnet.id
+  for_each = aws_subnet.private_subnet # Necesitamos for_each aquí para recorrer las subnets
+  subnet_id      = each.value.id # Accede a cada subnet usando each.value.id
   route_table_id = aws_route_table.private_route_table.id
 }

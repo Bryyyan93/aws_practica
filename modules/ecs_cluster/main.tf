@@ -9,11 +9,11 @@ resource "aws_ecs_cluster" "this" {
   tags = var.tags
 }
 
-# Crear el servicio ECS en Fargate
-resource "aws_ecs_service" "fargate_service" {
+# Crear el servicio ECS
+resource "aws_ecs_service" "service" {
   name = var.service_name
   cluster = aws_ecs_cluster.this.id
-  launch_type = "EC2"#"FARGATE"
+  launch_type = "EC2"
   desired_count = var.desired_count
   task_definition = var.task_definition
 

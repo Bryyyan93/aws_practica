@@ -18,12 +18,14 @@ variable "subnet_name" {
   type        = string
 }
 
-variable "availability_zone" {
+variable "availability_zones" {
   description = "Availability Zone for the subnet"
-  type        = string
+  type        = list(string)
 }
 
 variable "route_table_name" {
   description = "Name of the route table"
   type        = string
 }
+
+

@@ -5,5 +5,5 @@ output "ecs_cluster_id" {
 
 output "ecs_service_arn" {
   description = "ARN del ECS Service"
-  value       = aws_ecs_service.fargate_service.id
+  value       = aws_ecs_service.service.id
 }
