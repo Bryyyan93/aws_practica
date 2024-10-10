@@ -17,3 +17,8 @@ module "security_group" {
   vpc_cidr   = "10.0.0.0/16"
   sg_name    = var.sg_name
 }
+
+# # Llamada al módulo ecs_cluster
+module "ecs_cluster" {
+  source = "./modules/ecs_cluster"
+}
