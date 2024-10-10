@@ -20,3 +20,23 @@ variable "sg_name" {
   type        = string
   default     = "kc-sg-pf-bryan"
 }
+
+# Configuracion de ECS cluster
+variable "cluster_name" {
+  description = "Nombre del ECS cluster"
+  type = string
+  default = "kc-ecs-cluster-pf-bryan"
+}
+
+variable "route_table_name" {
+  description = "Nombre de la tabla de rutas"
+  type        = string
+  default     = "my-private-route-table"
+}
+
+variable "containerInsights" {
+  description = "Habilitar container Insigths"
+  type = string
+  default = "enabled"
+}
+

@@ -6,7 +6,7 @@ module "vpc" {
   vpc_name          = var.vpc_name
   subnet_name       = var.subnet_name
   availability_zone = var.availability_zone
-  route_table_name  = "private-route-table"
+  route_table_name  = var.route_table_name
 }
 
 # Llamada al módulo Security Group
@@ -18,7 +18,19 @@ module "security_group" {
   sg_name    = var.sg_name
 }
 
-# # Llamada al módulo ecs_cluster
+
+# Llamada al módulo ecs_cluster
 module "ecs_cluster" {
   source = "./modules/ecs_cluster"
+  cluster_name = var.cluster_name
+  containerInsights = var.containerInsights
+
+  subnets = [ module.vpc.subnet_id ]
+  security_group_id = module.security_group.security_group_id
+  service_name = "kc-fargate-service"
+  desired_count = 1
+  task_definition = "arn:aws:ecs:eu-west-1:921108067704:task-definition/kc-td-bryan:1"
+  tags = {
+    Enviroment = "dev"
+  }
 }
