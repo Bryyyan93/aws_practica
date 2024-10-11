@@ -21,14 +21,17 @@ module "security_group" {
 
 # Llamada al módulo ecs_cluster
 module "ecs_cluster" {
+  vpc_id     = module.vpc.vpc_id
   source = "./modules/ecs_cluster"
   cluster_name = var.cluster_name
   containerInsights = var.containerInsights
+  target_group_arn  = module.nginx_service.target_group_arn
+  #aws_lb_target_group.nginx_tg.arn  # Pasa el Target Group ARN aquí
 
   #subnets = module.vpc.subnet_ids 
   subnets = module.vpc.public_subnet_ids
   security_group_id = module.security_group.security_group_id
-  service_name = "kc-ecs-service"
+  service_name = "kc-ecs-service-pf-bryan"
   desired_count = 2
   task_definition = module.nginx_service.task_definition_arn # module.nginx_service.task_definition.id
   #task_definition = "arn:aws:ecs:eu-west-1:921108067704:task-definition/kc-td-bryan:1"

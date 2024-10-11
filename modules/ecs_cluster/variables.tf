@@ -37,3 +37,21 @@ variable "security_group_id" {
   description = "ID del Security Group para el ECS"
   type        = string
 }
+
+variable "target_group_arn" {
+  description = "ARN del Target Group del ALB"
+  type        = string
+}
+
+variable "vpc_id" {
+  description = "ID de la VPC"
+  type        = string
+}
+
+
+/*
+variable "key_name" {
+  description = "Nombre de la clave para acceder a las instancias vía SSH"
+  type        = string
+}
+*/
