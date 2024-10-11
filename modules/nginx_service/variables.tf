@@ -31,6 +31,11 @@ variable "container_memory" {
 variable "execution_role_arn" {
   description = "ARN del rol de ejecución para la task definition"
   type        = string
+
+}
+output "task_definition_arn" {
+  description = "ARN del Task Definition de NGINX"
+  value       = aws_ecs_task_definition.nginx.arn
 }
 
 variable "task_role_arn" {

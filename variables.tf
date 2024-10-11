@@ -37,6 +37,7 @@ variable "route_table_name" {
 variable "containerInsights" {
   description = "Habilitar container Insigths"
   type = string
-  default = "enabled"
+  default = "disabled"
 }
+
 

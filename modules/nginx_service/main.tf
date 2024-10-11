@@ -52,10 +52,11 @@ resource "aws_ecs_service" "nginx_service" {
 # Crear el balancedor de carga para gestionar el trafico
 resource "aws_lb" "nginx_alb" {
   name               = var.alb_name
-  internal           = true # Esto asegura que sea un ALB público
+  internal           = false # Esto asegura que sea un ALB público
   load_balancer_type = "application"
   security_groups    = [var.alb_security_group_id]
   subnets            = var.subnets
+  #subnets = [var.alb_security_group_id] # Usa las subnets públicas
 
   tags = var.tags
 }
