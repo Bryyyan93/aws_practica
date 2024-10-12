@@ -28,6 +28,21 @@ variable "ecs_instance_name" {
   type        = string
 }
 
+variable "ecs_task_execution_role_arn" {
+  description = "The ARN of the ECS Task Execution Role"
+  type        = string
+}
+
+variable "target_group_arn" {
+  description = "ARN of the Target Group"
+  type        = string
+}
+
+variable "lb_listener_arn" {
+  description = "ARN of the Load Balancer Listener"
+  type        = string
+}
+
 variable "min_size" {
   description = "Minimum number of instances"
   type        = number

@@ -53,6 +53,9 @@ module "autoscaling" {
   instance_profile_name  = module.iam.instance_profile_name # Aquí usamos el output del módulo IAM
   ecs_cluster_name       = var.ecs_cluster_name
   ecs_instance_name = var.ecs_instance_name
+  ecs_task_execution_role_arn = module.iam.ecs_task_execution_role_arn # Pasar el ARN desde el módulo IAM
+  target_group_arn       = module.alb.target_group_arn  # Pasar el ARN del Target Group desde el módulo alb
+  lb_listener_arn = module.alb.listener_arn
   min_size               = var.min_size
   max_size               = var.max_size
   desired_capacity       = var.desired_capacity
