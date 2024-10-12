@@ -1,4 +1,4 @@
-resource "aws_ecs_cluster" "this" {
+resource "aws_ecs_cluster" "main" {
   name = var.cluster_name
 
   setting {
@@ -34,27 +34,12 @@ resource "aws_launch_template" "ecs_launch_template" {
   image_id      = data.aws_ami.ecs_optimized.id
   instance_type = "t2.micro"  # Puedes ajustar el tamaño según lo necesites.
 
-  # Script para instalar y arrancar NGINX
   user_data = base64encode(<<EOF
-  #!/bin/bash
-  yum update -y
-  yum install -y nginx
-  systemctl enable nginx
-  systemctl start nginx
-  EOF
+#!/bin/bash
+echo ECS_CLUSTER=${var.cluster_name} >> /etc/ecs/ecs.config
+EOF
   )
 
-  network_interfaces {
-    associate_public_ip_address = true
-    security_groups             = [var.security_group_id]  # Asignar el SG solo para HTTP
-  }
-
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name = "ecs-instance"
-    }
-  }
   #key_name = var.key_name  # Si deseas conectarte vía SSH
 }
 

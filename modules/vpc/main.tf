@@ -16,37 +16,29 @@ resource "aws_subnet" "public_subnet" {
   availability_zone = each.value
 
   tags = {
-    Name = "${var.vpc_name}-public-${each.value}"
+    Name = var.gateway_name
   }
 }
 
-# Crear la ruta a Internet en la tabla de rutas
-resource "aws_route_table" "public_route_table" {
-  vpc_id = aws_vpc.this.id
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
 
   tags = {
-    Name = "${var.vpc_name}-public-rt"
+    Name = var.route_table_name
   }
 }
 
-# Asociar subnets a las rutas publicas
-resource "aws_route_table_association" "public_subnet_association" {
-  for_each        = aws_subnet.public_subnet
-  subnet_id       = each.value.id
-  route_table_id  = aws_route_table.public_route_table.id
+resource "aws_route_table_association" "public_a" {
+  subnet_id      = aws_subnet.public_subnet_a.id
+  route_table_id = aws_route_table.public_rt.id
 }
 
-# Crear el Internet Gateway 
-resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
-
-  tags = {
-    Name = "${var.vpc_name}-igw"
-  }
-}
-
-resource "aws_route" "internet_access" {
-  route_table_id         = aws_route_table.public_route_table.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.this.id
+resource "aws_route_table_association" "public_b" {
+  subnet_id      = aws_subnet.public_subnet_b.id
+  route_table_id = aws_route_table.public_rt.id
 }
