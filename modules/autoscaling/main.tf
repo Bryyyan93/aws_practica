@@ -1,8 +1,16 @@
+
+data "aws_ssm_parameter" "ecs_node_ami" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
+}
+
 # Launch Template para las instancias EC2
 resource "aws_launch_template" "ecs_launch_template" {
   name_prefix   = "kc-ecs-launch-template-pf-bryan"
-  image_id        = var.ami_id
+  image_id        = data.aws_ssm_parameter.ecs_node_ami.value #var.ami_id
   instance_type   = var.instance_type
+
+  # Acceso ssh
+  key_name = "kc-kp-bryan"
     
   #iam_instance_profile = var.instance_profile_name
   iam_instance_profile {
@@ -19,7 +27,7 @@ resource "aws_launch_template" "ecs_launch_template" {
               #!/bin/bash
               echo ECS_CLUSTER=${var.ecs_cluster_name} >> /etc/ecs/ecs.config
             EOF
-  )
+          )
 }
 
 # Auto Scaling Group que usa el Launch Template
