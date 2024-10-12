@@ -1,3 +1,5 @@
+###################### Definición de variables #########################
+# Estas variables te permiten parametrizar el despliegue de tu infraestructura
 # General AWS region
 variable "region" {
   description = "AWS region to deploy the infrastructure"
