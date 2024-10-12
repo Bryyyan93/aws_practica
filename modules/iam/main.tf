@@ -28,6 +28,6 @@ resource "aws_iam_role_policy_attachment" "ecs_instance_policy" {
 
 # Instance Profile para EC2
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
-  name = "ecs_instance_profile"
+  name = "kc-ecs-instance-profile-bryan"
   role = aws_iam_role.ecs_instance_role.name
 }

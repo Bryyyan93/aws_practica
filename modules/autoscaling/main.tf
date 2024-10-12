@@ -1,6 +1,6 @@
 # Launch Template para las instancias EC2
 resource "aws_launch_template" "ecs_launch_template" {
-  name_prefix   = "ecs-launch-template-bryan"
+  name_prefix   = "kc-ecs-launch-template-pf-bryan"
   image_id        = var.ami_id
   instance_type   = var.instance_type
     
@@ -24,6 +24,7 @@ resource "aws_launch_template" "ecs_launch_template" {
 
 # Auto Scaling Group que usa el Launch Template
 resource "aws_autoscaling_group" "ecs_asg" {
+  name_prefix = "kc-ag-pf-bryan"
   #launch_configuration = aws_launch_configuration.ecs_launch_config.id
   min_size             = var.min_size
   max_size             = var.max_size
@@ -41,3 +42,30 @@ resource "aws_autoscaling_group" "ecs_asg" {
     propagate_at_launch = true
   }
 }
+
+resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
+  name = "kc-ecs-capacity-provider-bryan"
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = aws_autoscaling_group.ecs_asg.arn
+    managed_termination_protection = "DISABLED"
+
+    managed_scaling {
+      maximum_scaling_step_size = 2
+      minimum_scaling_step_size = 1
+      status                    = "ENABLED"
+      target_capacity           = 100
+    }
+  }
+}
+# Asociar el Capacity Provider al ECS Cluster
+resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_capacity_providers" {
+  cluster_name       = var.ecs_cluster_name
+  capacity_providers = [aws_ecs_capacity_provider.ecs_capacity_provider.name]
+
+  default_capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.ecs_capacity_provider.name
+    weight            = 1
+  }
+}
+
