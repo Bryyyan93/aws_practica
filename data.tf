@@ -1,7 +1,9 @@
-data "aws_region" "current" {}
+data "aws_ami" "latest_amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
 
-data "aws_caller_identity" "current" {}
-
-data "http" "my_ip" {
-  url = "https://checkip.amazonaws.com/"
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-2.0.*-x86_64-gp2"]
+  }
 }
