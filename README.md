@@ -48,8 +48,8 @@ modules/
 ```
 
 ### Crear VPC
-Se crea los diferentes componentes en la ruta: `modules/vpc`  
-Se crean una nueva VPC y dos subnets públicas  
+Se crea los diferentes componentes en la ruta: `modules/vpc` y se hace la llamada desde el `main.tf` principal.  
+Se crean una nueva VPC y dos subnets públicas:  
 ```
 # Crea la primera subnet pública dentro de la VPC
 resource "aws_subnet" "public_subnet_a" {
@@ -120,6 +120,11 @@ Esto debe ser para las dos subnets, para la segunda es similar.
 Una vez se ha creado este modulo, se puede comprobar que funciona. Para ello ejecutaremos el siguiente comando `terraform apply` y comprobamos que se ha creado correctamente:  
 ![Comprobar la correcta ejecución](./img/vpc_creation.png)  
 
-### Crear un Cluster ECS escalable
-
-
+### Crear un Cluster ECS (Elastic Container Service) escalable
+El siguiente paso es crear un cluster ECS, para ello se crea el componente en la ruta: `modules/ecs_cluster` y se hace la llamada desde el `main.tf` principal.  
+```
+resource "aws_ecs_cluster" "main" {
+  name = var.cluster_name
+} 
+``` 
+Este código crea un cluster vacío, se crearán instancias EC2 
