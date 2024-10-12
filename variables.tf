@@ -43,13 +43,6 @@ variable "ecs_cluster_name" {
   default     = "kc-ecs-cluster-pf-bryan"
 }
 
-# Auto Scaling Group variables
-variable "ami_id" {
-  description = "AMI ID for the EC2 instances"
-  type        = string
-  #default     = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 ECS Optimized AMI
-}
-
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
@@ -87,6 +80,7 @@ variable "target_group_name" {
   default     = "ecs-target-group-bryan"
 }
 
+# Valores por defecto
 /*
 # Security Group for EC2 and ALB
 variable "security_group_id" {
@@ -98,5 +92,13 @@ variable "security_group_id" {
 variable "instance_profile_name" {
   description = "The name of the IAM instance profile for the EC2 instances"
   type        = string
+}
+
+# Auto Scaling Group variables
+
+variable "ami_id" {
+  description = "AMI ID for the EC2 instances"
+  type        = string
+  #default     = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 ECS Optimized AMI
 }
 */
