@@ -36,11 +36,43 @@ variable "availability_zone_b" {
   default     = "eu-west-1b"
 }
 
+variable "vpc_name" {
+  description = "Name of the VPC"
+  type = string
+  default = "kc-vpc-pf-bryan"
+}
+
+variable "gateway_name" {
+  description = "Name of the gateway"
+  default = "kc-gw-pf-bryan"
+}
+
+variable "public_subnet_a_name" {
+  description = "Name of the subnet a"
+  default = "kc-public-subnet-a-bryan"
+}
+
+variable "public_subnet_b_name" {
+  description = "Name of the subnet b"
+  default = "kc-public-subnet-b-bryan"
+}
+
+variable "route_table_name" {
+  description = "Name of the route table"
+  default = "kc-route-table-bryan"
+}
+
 # ECS Cluster variables
 variable "ecs_cluster_name" {
   description = "The name of the ECS cluster"
   type        = string
   default     = "kc-ecs-cluster-pf-bryan"
+}
+
+variable "ecs_instance_name" {
+  description = "ECS instance name for the instances"
+  type        = string
+  default = "kc-ecs-instance-bryan"
 }
 
 variable "instance_type" {
@@ -79,26 +111,3 @@ variable "target_group_name" {
   type        = string
   default     = "ecs-target-group-bryan"
 }
-
-# Valores por defecto
-/*
-# Security Group for EC2 and ALB
-variable "security_group_id" {
-  description = "The ID of the security group for the instances and ALB"
-  type        = string
-}
-
-# Instance Profile Name for EC2
-variable "instance_profile_name" {
-  description = "The name of the IAM instance profile for the EC2 instances"
-  type        = string
-}
-
-# Auto Scaling Group variables
-
-variable "ami_id" {
-  description = "AMI ID for the EC2 instances"
-  type        = string
-  #default     = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 ECS Optimized AMI
-}
-*/

@@ -23,6 +23,7 @@ variable "availability_zone_b" {
   type        = string
 }
 
+# Names of the instances
 variable "vpc_name" {
   description = "The name of the VPC"
   type        = string
@@ -31,4 +32,16 @@ variable "vpc_name" {
 variable "gateway_name" {
   description = "The name of the Internet Gateway"
   type        = string
+}
+
+variable "public_subnet_a_name" {
+  description = "Name of the subnet a"
+}
+
+variable "public_subnet_b_name" {
+  description = "Name of the subnet b"
+}
+
+variable "route_table_name" {
+  description = "Name of the route table"
 }

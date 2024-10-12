@@ -10,8 +10,11 @@ module "vpc" {
   public_subnet_b_cidr  = var.public_subnet_b_cidr
   availability_zone_a   = var.availability_zone_a
   availability_zone_b   = var.availability_zone_b
-  vpc_name              = "main-vpc"
-  gateway_name          = "main-gateway"
+  vpc_name              = var.vpc_name
+  gateway_name          = var.gateway_name
+  public_subnet_a_name = var.public_subnet_a_name
+  public_subnet_b_name = var.public_subnet_b_name
+  route_table_name = var.route_table_name
 }
 
 # Módulo de ECS Cluster
@@ -49,6 +52,7 @@ module "autoscaling" {
   security_group_id      = module.security_group.security_group_id
   instance_profile_name  = module.iam.instance_profile_name # Aquí usamos el output del módulo IAM
   ecs_cluster_name       = var.ecs_cluster_name
+  ecs_instance_name = var.ecs_instance_name
   min_size               = var.min_size
   max_size               = var.max_size
   desired_capacity       = var.desired_capacity

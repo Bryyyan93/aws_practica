@@ -13,7 +13,7 @@ resource "aws_subnet" "public_subnet_a" {
   availability_zone       = var.availability_zone_a
 
   tags = {
-    Name = "public-subnet-a"
+    Name = var.public_subnet_a_name
   }
 }
 
@@ -24,7 +24,7 @@ resource "aws_subnet" "public_subnet_b" {
   availability_zone       = var.availability_zone_b
 
   tags = {
-    Name = "public-subnet-b"
+    Name = var.public_subnet_b_name
   }
 }
 
@@ -45,7 +45,7 @@ resource "aws_route_table" "public_rt" {
   }
 
   tags = {
-    Name = "public-route-table"
+    Name = var.route_table_name
   }
 }
 

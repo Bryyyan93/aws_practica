@@ -23,6 +23,11 @@ variable "ecs_cluster_name" {
   type        = string
 }
 
+variable "ecs_instance_name" {
+  description = "ECS instance name for the instances"
+  type        = string
+}
+
 variable "min_size" {
   description = "Minimum number of instances"
   type        = number
