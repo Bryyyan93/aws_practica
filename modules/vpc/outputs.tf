@@ -1,4 +1,5 @@
-############### Definición de Output ##############
+################### Definición de Output ######################
+###############################################################
 # Estas instancias pueden ser usadas por otros modulos
 # Devuelve el ID de la VPC creada.
 output "vpc_id" {

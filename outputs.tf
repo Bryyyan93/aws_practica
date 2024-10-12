@@ -1,4 +1,5 @@
-############### Definición de Output ##############
+################### Definición de Output ######################
+###############################################################
 # Estas instancias pueden ser usadas por otros modulos
 # Devuelve el ID de la VPC que se creó a través del módulo "vpc".
 output "vpc_id" {
@@ -28,6 +29,12 @@ output "ecs_cluster_id" {
 output "alb_arn" {
   description = "The ARN of the Application Load Balancer"
   value       = module.alb.alb_arn
+}
+
+# Devuelve el DNS Name del Application Load Balancer (ALB)
+output "alb_dns" {
+  description = "DNS Name of the Application Load Balancer"
+  value       = module.alb.alb_dns #aws_lb.ecs_alb.dns_name
 }
 
 # Devuelve el ARN del Target Group asociado al ALB, que es donde las solicitudes se enrutan.

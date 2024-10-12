@@ -1,4 +1,5 @@
-###################### Definición de variables #########################
+################### Definición de variables ######################
+###############################################################
 # Estas variables te permiten parametrizar el despliegue de tu infraestructura
 # define el rango de direcciones IP de la VPC
 variable "vpc_cidr_block" {

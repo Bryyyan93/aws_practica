@@ -1,3 +1,5 @@
+################### Definición de variables ######################
+###############################################################
 # Nombre del Application Load Balancer (ALB)
 variable "alb_name" {
   description = "Name of the Application Load Balancer"

@@ -1,3 +1,5 @@
+################### Definición de Output ######################
+###############################################################
 # Devuelve el ARN del Application Load Balancer (ALB)
 output "alb_arn" {
   value = aws_lb.ecs_alb.arn

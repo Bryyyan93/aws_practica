@@ -1,3 +1,5 @@
+################### Definición de variables ######################
+###############################################################
 # ID de la AMI (Amazon Machine Image) que se utilizará para lanzar las instancias EC2.
 variable "ami_id" {
   description = "AMI ID for EC2 instances"
