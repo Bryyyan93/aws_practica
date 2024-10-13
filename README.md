@@ -302,5 +302,5 @@ resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_capacity_providers" {
 Verificamos que se ha implementado correctamente, ejecutamos `terraform apply`, y en la consola accedemos a `Amazon Elastic Container Service > Clusters`, en el apartado `Infrastructure` deberiamos ver las instancias `EC2` creadas.   
 ![Instancias EC2 creadas](/img/instancias_cluster.png)  
 
-##
+
 
