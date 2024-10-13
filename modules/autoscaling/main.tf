@@ -50,6 +50,7 @@ resource "aws_autoscaling_group" "ecs_asg" {
   }
 }
 
+# Crear el capacity provider
 resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
   name = "kc-ecs-capacity-provider-bryan"
 
