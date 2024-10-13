@@ -158,7 +158,9 @@ resource "aws_route_table_association" "public_a" {
 Esto debe ser para las dos subnets, para la segunda es similar.
 
 Una vez se ha creado este módulo, se puede comprobar que funciona. Para ello ejecutaremos el siguiente comando `terraform apply` y comprobamos que se ha creado correctamente:  
-![Comprobar la correcta ejecución](./img/vpc_creation.png)  
+<p align="center">
+    <img src="./img/vpc_creation.png" alt="Comprobar la correcta ejecución" width="900"/>
+</p>  
 
 ### ECS Cluster (Elastic Container Service)
 El siguiente paso es crear un cluster ECS, para ello se crea el componente en la ruta: `./modules/ecs_cluster` y se hace la llamada desde el `main.tf` principal. Para ello, se seguirá el siguiente plan:
@@ -313,7 +315,10 @@ Algunas consideraciones para esta implementación son:
 
 En este punto ya se puede comprobar que las instancias se crean correctamente, por tanto, usamos el comando `terraform apply`.   
 Para verificar la creación de las instancias, entramos en la consola de `AWS` y accedemos al apartado `EC2 > Instances`  
-![Instacias EC2 creadas](/img/ec2_instances.png)  
+
+<p align="center">
+    <img src="./img/ec2_instances.png" alt="Instancias EC2 creadas" width="900"/>
+</p>    
 
 #### Capacity Provider
 Finalmente, debemos conectar el clúster ECS al grupo de autoescalado para que el clúster pueda usar instancias EC2, para ello debemos implementar `Capacity provider`. Esta plantilla se crea en la ruta: `./modules/autoscaling`.
@@ -349,7 +354,10 @@ resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_capacity_providers" {
 }
 ```
 Verificamos que se ha implementado correctamente, ejecutamos `terraform apply`, y en la consola accedemos a `Amazon Elastic Container Service > Clusters`, en el apartado `Infrastructure` deberiamos ver las instancias `EC2` creadas.   
-![Instancias EC2 creadas](/img/instancias_cluster.png)  
+
+<p align="center">
+    <img src="./img/instancias_cluster.png" alt="Instancias EC2 en el Clúster" width="900"/>
+</p>    
 
 ### Crear ECS Service
 En este apartado se creará y se configurará el servicio en el `ECS`. Para ello, se seguirá el siguiente plan:
@@ -435,7 +443,10 @@ En este caso, en el `Target group` al trabajar con instancias ECS sin ENI asigna
 
 Si ejecutamos `terraform apply` en este paso, creará y ejecutará un nuevo servicio. Lo podemos verificar en `Amazon Elastic Container Service > Clusters`, en el apartado `Services` 
 
-![alt text](/img/cluster_service.png)  
+<p align="center">
+    <img src="./img/cluster_service.png" alt="Servicio en el Clúster" width="900"/>
+</p>
+ 
 
 #### Load Balancer (ALB)
 Se creará el balanceador de carga, en el que debemos referencial el `SG` implementado previamente. Esta definición se creará en `./modules/alb`.  
@@ -513,10 +524,15 @@ resource "aws_ecs_service" "nginx_service" {
 ```  
 Finalmente comprobamos que todos los servicios se ejecuten correctamente. Para ello se deberá ejecutar `terraform apply` y lo verificamos en `EC2 > Load Balancers`, en el apartado `Details`  
 
-![load_balancer](/img/load_balancer.png)  
+<p align="center">
+    <img src="./img/load_balancer.png" alt="Load Balancer" width="900"/>
+</p>  
 
-Accedemos al DNS del balanceador y confirmamos que se puede acceder al servicio de `NGINX`:
-![alt text](/img/nginx_service.png)  
+Accedemos al DNS del balanceador y confirmamos que se puede acceder al servicio de `NGINX`:  
+
+<p align="center">
+    <img src="./img/nginx_service.png" alt="Servicio NGINX" width="900"/>
+</p>  
 
 #### Sacar datos por pantalla
 En la practica se requiere generar un output con el endpoint de conexión, para ello debemos:  
@@ -536,8 +552,11 @@ En la practica se requiere generar un output con el endpoint de conexión, para 
     value       = module.alb.alb_dns #aws_lb.ecs_alb.dns_name
   }
   ```     
-- Obtenemos el siguiente resultado:
-![Outputs de terraform](/img/outputs_terraform.png)  
+- Obtenemos el siguiente resultado:  
+
+<p align="center">
+    <img src="./img/outputs_terraform.png" alt="Outputs de Terraform" width="700"/>
+</p>  
 
 En la imagen podemos observar la variable `alb_dns` que nos mostrará el servico `NGINX` en el navegador web
 ## Mejoras futuras
