@@ -167,6 +167,12 @@ resource "aws_iam_role_policy_attachment" "ecs_instance_policy" {
   role       = aws_iam_role.ecs_instance_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
+
+# Instance Profile para EC2
+resource "aws_iam_instance_profile" "ecs_instance_profile" {
+  name = "kc-ecs-instance-profile-bryan"
+  role = aws_iam_role.ecs_instance_role.name
+}
 ```  
 Ahora se crea el grupo de seguridad (SG) para permitir el tráfico de salida. Esta plantilla se crea en la ruta: `./modules/security_group`.    
 ```
@@ -302,5 +308,194 @@ resource "aws_ecs_cluster_capacity_providers" "ecs_cluster_capacity_providers" {
 Verificamos que se ha implementado correctamente, ejecutamos `terraform apply`, y en la consola accedemos a `Amazon Elastic Container Service > Clusters`, en el apartado `Infrastructure` deberiamos ver las instancias `EC2` creadas.   
 ![Instancias EC2 creadas](/img/instancias_cluster.png)  
 
+### Crear ECS Service
+En este apartado se creará y se configurará el servicio en el `ECS`. Para ello, se seguirá el siguiente plan:
+
+- Crear un rol IAM para `ECS Task`
+- Crear una `Task Definition`
+- Crear un `ECS Service`
+- Crear un `Load Balancer (ALB)`
+- Conectar el `ECS Service` to `ALB`
+
+#### rol IAM para ECS Task
+Se deberá crear el IAM Role y adjuntar las políticas necesarias para que sea utilizado por la Task Definition. Esta definición se creará en `./modules/iam`.  
+```
+# Crear un IAM role especifico para el autoescalado
+# IAM Role para ECS Task Execution
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecs_task_execution_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+# Adjuntar política para ECS Task Execution
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+```  
+#### Task definition
+En la `Task definition` describimos de donde y como lanzar el contenedor docker con la imagen que necesitamos, en este caso `NGINX`. Esta definición se creará en `./modules/autoscalling`.  
+```
+# Task Definition para NGINX
+resource "aws_ecs_task_definition" "nginx_task" {
+  family                   = "nginx-task"
+  network_mode             = "bridge" # Cambia a bridge para compatibilidad con target_type instance
+  requires_compatibilities = ["EC2"]
+  execution_role_arn       = var.ecs_task_execution_role_arn
+  container_definitions = jsonencode([{
+    name      = "nginx"
+    image     = "nginx:latest"
+    essential = true
+    portMappings = [{
+      containerPort = 80
+      hostPort      = 80
+    }]
+    memory   = 512
+    cpu      = 256
+  }])
+}
+```  
+*Nota*: La definición de la tarea se crea por cuenta de AWS, no por clúster de ECS. Por lo tanto, el nombre de la familia debe ser único.
+#### ECS Service
+Se creará un servicio para que esté disponible dentro del clúster y tener acceso a Internet. Esta definición se creará en `./modules/autoscalling`.  
+```
+# servicio ECS orquestará el despliegue de NGINX en las instancias EC2
+resource "aws_ecs_service" "nginx_service" {
+  name            = "nginx-service"
+  cluster         = var.ecs_cluster_name
+  task_definition = aws_ecs_task_definition.nginx_task.arn
+  desired_count   = 1
+  launch_type     = "EC2"
+
+/* #Solo sirve si la configuracion de red en awsvpc
+  network_configuration {
+    subnets         = var.subnets
+    security_groups = [var.security_group_id]
+    assign_public_ip = true
+  }
+*/
+}
+```
+Algunas consideraciones para esta implementación son:  
+- `network_configuration`: Esta configuaración de debe implementar si la configuración de red para `awsvpc`. El modo de red awsvpc es generalmente utilizado para tareas que se ejecutan en AWS Fargate o en instancias EC2 con ENI asignados directamente.
+En este caso, en el `Target group` al trabajar con instancias ECS sin ENI asignado, se usará tipo `instance`.  
+
+Si ejecutamos `terraform apply` en este paso, creará y ejecutará un nuevo servicio. Lo podemos verificar en `Amazon Elastic Container Service > Clusters`, en el apartado `Services` 
+
+![alt text](/img/cluster_service.png)  
+
+#### Load Balancer (ALB)
+Se creará el balanceador de carga, en el que debemos referencial el `SG` implementado previamente. Esta definición se creará en `./modules/alb`.  
+```
+# Recurso para crear un Application Load Balancer (ALB) en AWS.
+# Este balanceador de carga se utilizará para distribuir el tráfico HTTP a las instancias ECS.
+resource "aws_lb" "ecs_alb" {
+  name               = var.alb_name
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [var.security_group_id]
+  subnets            = var.subnets
+  # Etiquetas para el ALB, para identificación en AWS.
+  tags = {
+    Name = var.alb_name
+  }
+}
+
+# Recurso para crear un Target Group que será utilizado por el ALB.
+# Este grupo define el puerto y protocolo de las instancias a las que se enruta el tráfico.
+resource "aws_lb_target_group" "ecs_tg" {
+  name     = var.target_group_name
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = var.vpc_id
+
+  # Verifica que las instancias estén saludables.
+  health_check {
+    path = "/"
+    port = "80"
+  }
+}
+
+# Recurso para crear un Listener para el ALB.
+# Este listener escucha el tráfico en el puerto 80 (HTTP) y lo redirige al Target Group.
+resource "aws_lb_listener" "ecs_listener" {
+  load_balancer_arn = aws_lb.ecs_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  # Redirige el tráfico al Target Group.
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ecs_tg.arn
+  }
+}
+```  
+#### Conectar el `ECS Service` al `ALB`
+Para conectar el servico al baleanceadir de carga, se deberá actualizar la configuración de `aws_ecs_service` agregando una sección con `load_balancer`. Esta actualización se hará en `./modules/autoscaling`.  
+```
+# servicio ECS orquestará el despliegue de NGINX en las instancias EC2
+resource "aws_ecs_service" "nginx_service" {
+  name            = "nginx-service"
+  cluster         = var.ecs_cluster_name
+  task_definition = aws_ecs_task_definition.nginx_task.arn
+  desired_count   = 1
+  launch_type     = "EC2"
+/* #Solo sirve si la configuracion de red en awsvpc
+  network_configuration {
+    subnets         = var.subnets
+    security_groups = [var.security_group_id]
+    assign_public_ip = true
+  }
+*/
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = "nginx"
+    container_port   = 80
+  }
+
+  depends_on = [
+    var.lb_listener_arn  # Usar la variable lb_listener_arn
+  ]
+}
+```  
+Finalmente comprobamos que todos los servicios se ejecuten correctamente. Para ello se deberá ejecutar `terraform apply` y lo verificamos en `EC2 > Load Balancers`, en el apartado `Details`  
+
+![load_balancer](/img/load_balancer.png)  
+
+Accedemos al DNS del baleanceador y confirmamos que se puede acceder al servicio de `NGINX`:
+![alt text](/img/nginx_service.png)  
+
+#### Sacar datos por pantalla
+En la practica se requiere generar un output con el endpoint de conexión, para ello debemos:  
+- Añadir una nueva instancia en `./modules/lb/outputs.tf`:  
+  ```
+  # Devuelve el DNS Name del Application Load Balancer (ALB)
+  output "alb_dns" {
+  description = "DNS Name of the Application Load Balancer"
+  value       = aws_lb.ecs_alb.dns_name
+  }
+  ```  
+- Añadir una nueva instancia en el output principal en `./outputs.tf`:  
+  ```
+  # Devuelve el DNS Name del Application Load Balancer (ALB)
+  output "alb_dns" {
+    description = "DNS Name of the Application Load Balancer"
+    value       = module.alb.alb_dns #aws_lb.ecs_alb.dns_name
+  }
+  ```     
+- Obtenemos el siguiente resultado:
+![Outputs de terraform](/img/outputs_terraform.png)  
+
+En la imagen podemos observar la variable `alb_dns` que nos mostrará el servico `NGINX` en el navegador web
 
 
