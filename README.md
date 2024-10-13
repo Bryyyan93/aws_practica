@@ -1,24 +1,48 @@
 # Práctica Final de AWS - Bootcamp Keepcoding AWS
+# Índice
+En esta práctica se han desarrollado los siguientes puntos:
+* [Requisitos](#requisitos)
+* [Despliegue de la plantilla](#despliegue-de-la-plantilla)
+* [Módulos](#módulos)
+  * [Virtual Private Cloud (VPC)](#virtual-private-cloud-vpc)
+    * [Internet Gateway](#internet-gateway)
+    * [Route Table](#route-table)
+  * [ECS Cluster (Elastic Container Service)](#ecs-cluster-elastic-container-service)
+    * [IAM role y Security group (SG)](#iam-role-y-security-group-sg)
+    * [Launch Template](#launch-template)
+    * [Autoscaling Group (AG)](#autoscaling-group-ag)
+    * [Capacity Provider](#capacity-provider)
+  * [Crear ECS Service](#crear-ecs-service)
+    * [IAM Role para ECS Task](#iam-role-para-ecs-task)
+    * [Task Definition](#task-definition)
+    * [ECS Service](#ecs-service)
+    * [Load Balancer (ALB)](#load-balancer-alb)
+    * [Conectar el ECS Service al ALB](#conectar-el-ecs-service-al-alb)
+* [Sacar datos por pantalla](#sacar-datos-por-pantalla)
+* [Mejoras futuras](#mejoras-futuras)
+* [Referencias](#referencias)
+
 ## Requisitos
-Hacer una plantilla de Terraform que despliegüe:
+Hacer una plantilla de Terraform que despliegue:
 - un **nginx** en un **Cluster ECS**. 
 - Generar un output de Terraform con el endpoint de conexión.
 
 ### Parámetros de Entrega:
 
 - Se entrega al final del módulo de AWS.
-- Se debe entregar la plantilla Terraform para ser ejecutada por el Intructor a fín de evaluar la práctica final.
+- Se debe entregar la plantilla Terraform para ser ejecutada por el Instructor a fin de evaluar la práctica final.
 - La entrega es a través del GitHub del alumno.
 - Al finalizar el tiempo de entrega, se facilitará la solución de la práctica final.
 
-**Tips:** Se debe crear antes el **Task Definition** y para facilitar la práctica se hace en la **VPC Defaulft Pública**.  
+**Tips:** Se debe crear antes el **Task Definition** y para facilitar la práctica se hace en la **VPC Default Pública**.  
 
-## Despliegue de la plantilla.
-Para realizar el despliegue de la plantilla se ha hecho de manera modular, tambien se ha ido desarrollando paso a paso para verificar el funcionamiento de las partes por separado.  
+## Despliegue de la plantilla
+Para realizar el despliegue de la plantilla se ha hecho de manera modular, también se ha ido desarrollando paso a paso para verificar el funcionamiento de las partes por separado.  
 El esquema general del despliegue es el siguiente:  
 ```
 AWS_PRACTICA/
 │
+├── img/                   # Directorio que contiene imágenes utilizadas en la documentación.
 ├── modules/               # Directorio que contiene módulos reutilizables.
 │   ├── alb/               # Módulo para configurar el Application Load Balancer (ALB).
 │   ├── autoscaling/       # Módulo para configurar el Auto Scaling Group (ASG).
@@ -34,8 +58,9 @@ AWS_PRACTICA/
 ├── README.md              # Documentación del despliegue.
 └── variables.tf           # Definiciones de variables globales para el despliegue.
 
+
 ```  
-Cada modulo tiene su configuración que se hará estandar para todos los modulos:  
+Cada módulo tiene su configuración que se hará estandar para todos los módulos:  
 ```
 modules/
 │
@@ -44,10 +69,29 @@ modules/
     ├── outputs.tf         # Archivo que exporta los valores clave del ALB (ARN, DNS, etc.).
     └── variables.tf       # Archivo donde se definen las variables utilizadas en este módulo.
 ```
+Se procederá a crear las instancias necesarias, para lo cual se empezará el proceso por partes.  
+### Virtual private cloud (VPC)
+Se crea los diferentes componentes en la ruta: `./modules/vpc` y se hará la llamada desde el `main.tf` principal. Para ello, se seguirá el siguiente plan:
 
-### VPC
-Se crea los diferentes componentes en la ruta: `./modules/vpc` y se hace la llamada desde el `main.tf` principal.  
-Se crean una nueva VPC y dos subnets públicas:  
+- Crear una `VPC`
+- Crear dos `subnets`
+- Crear un `Internet Gateway`
+- Crear un `Route table`
+#### VPC
+Se crea una nueva instancia para la `VPC` que se necesitará para el proyecto.
+```
+# Crea una VPC con el bloque CIDR especificado
+resource "aws_vpc" "main" {
+  cidr_block = var.vpc_cidr_block
+
+  # Identificar la VPC
+  tags = {
+    Name = var.vpc_name
+  }
+}
+```  
+#### Subnets
+Al tener múltiples subnets en diferentes Availability Zones, los balanceadores de carga, como el ALB (Application Load Balancer), pueden distribuir el tráfico entre las instancias en esas diferentes zonas. Por ello, se crearán dos:
 ```
 # Crea la primera subnet pública dentro de la VPC
 resource "aws_subnet" "public_subnet_a" {
@@ -113,11 +157,12 @@ resource "aws_route_table_association" "public_a" {
 ```
 Esto debe ser para las dos subnets, para la segunda es similar.
 
-Una vez se ha creado este modulo, se puede comprobar que funciona. Para ello ejecutaremos el siguiente comando `terraform apply` y comprobamos que se ha creado correctamente:  
+Una vez se ha creado este módulo, se puede comprobar que funciona. Para ello ejecutaremos el siguiente comando `terraform apply` y comprobamos que se ha creado correctamente:  
 ![Comprobar la correcta ejecución](./img/vpc_creation.png)  
 
 ### ECS Cluster (Elastic Container Service)
-El siguiente paso es crear un cluster ECS, para ello se crea el componente en la ruta: `./modules/ecs_cluster` y se hace la llamada desde el `main.tf` principal.  
+El siguiente paso es crear un cluster ECS, para ello se crea el componente en la ruta: `./modules/ecs_cluster` y se hace la llamada desde el `main.tf` principal. Para ello, se seguirá el siguiente plan:
+
 ```
 resource "aws_ecs_cluster" "main" {
   name = var.cluster_name
@@ -375,7 +420,7 @@ resource "aws_ecs_service" "nginx_service" {
   desired_count   = 1
   launch_type     = "EC2"
 
-/* #Solo sirve si la configuracion de red en awsvpc
+/* #Solo sirve si la configuración de red en awsvpc
   network_configuration {
     subnets         = var.subnets
     security_groups = [var.security_group_id]
@@ -439,7 +484,7 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 ```  
 #### Conectar el `ECS Service` al `ALB`
-Para conectar el servico al baleanceadir de carga, se deberá actualizar la configuración de `aws_ecs_service` agregando una sección con `load_balancer`. Esta actualización se hará en `./modules/autoscaling`.  
+Para conectar el servico al balanceador de carga, se deberá actualizar la configuración de `aws_ecs_service` agregando una sección con `load_balancer`. Esta actualización se hará en `./modules/autoscaling`.  
 ```
 # servicio ECS orquestará el despliegue de NGINX en las instancias EC2
 resource "aws_ecs_service" "nginx_service" {
@@ -448,7 +493,7 @@ resource "aws_ecs_service" "nginx_service" {
   task_definition = aws_ecs_task_definition.nginx_task.arn
   desired_count   = 1
   launch_type     = "EC2"
-/* #Solo sirve si la configuracion de red en awsvpc
+/* #Solo sirve si la configuración de red en awsvpc
   network_configuration {
     subnets         = var.subnets
     security_groups = [var.security_group_id]
@@ -470,7 +515,7 @@ Finalmente comprobamos que todos los servicios se ejecuten correctamente. Para e
 
 ![load_balancer](/img/load_balancer.png)  
 
-Accedemos al DNS del baleanceador y confirmamos que se puede acceder al servicio de `NGINX`:
+Accedemos al DNS del balanceador y confirmamos que se puede acceder al servicio de `NGINX`:
 ![alt text](/img/nginx_service.png)  
 
 #### Sacar datos por pantalla
