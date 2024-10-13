@@ -318,8 +318,40 @@ Para verificar la creación de las instancias, entramos en la consola de `AWS` y
 
 <p align="center">
     <img src="./img/ec2_instances.png" alt="Instancias EC2 creadas" width="900"/>
-</p>    
+</p>   
 
+Como complemento se puede implementar las instancias de escalado automático por uso de CPU:
+```
+# Definir el escalado automático para el servicio ECS
+resource "aws_appautoscaling_target" "ecs_target" {
+  service_namespace  = "ecs" # Tiene que ser el nombre del recurso, en este caso ecs
+  scalable_dimension = "ecs:service:DesiredCount"
+  resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.nginx_service.name}"
+  min_capacity       = var.min_size
+  max_capacity       = var.max_size
+}
+
+resource "aws_appautoscaling_policy" "ecs_target_cpu" {
+  name               = "application-scaling-policy-cpu"
+  policy_type        = "TargetTrackingScaling"
+  service_namespace  = "ecs"  # Directamente asignamos "ecs"
+  resource_id        = "service/${var.ecs_cluster_name}/${aws_ecs_service.nginx_service.name}"  # Usamos el resource_id con el nombre del clúster y el servicio
+  scalable_dimension = "ecs:service:DesiredCount"  # Asignamos directamente la dimensión escalable
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value       = 70  # Utilización objetivo de la CPU
+    scale_in_cooldown  = 300  # Cooldown antes de reducir
+    scale_out_cooldown = 300  # Cooldown antes de escalar hacia arriba
+  }
+
+  # Agregar dependencia explícita para asegurar el orden correcto
+  depends_on = [aws_appautoscaling_target.ecs_target]
+}
+```  
 #### Capacity Provider
 Finalmente, debemos conectar el clúster ECS al grupo de autoescalado para que el clúster pueda usar instancias EC2, para ello debemos implementar `Capacity provider`. Esta plantilla se crea en la ruta: `./modules/autoscaling`.
 ```

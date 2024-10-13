@@ -77,3 +77,21 @@ variable "subnets" {
   description = "List of subnets for the Auto Scaling Group"
   type        = list(string)
 }
+
+# Utilización objetivo de la CPU
+variable "cpu_target" {
+  description = "Maximun CPU usage"
+  type = number
+}
+
+# Cooldown antes de reducir
+variable "cd_bef_red" {
+  description = "Cooldown before the reducition of the instances"
+  type = number
+}
+
+# Cooldown antes de escalar hacia arriba
+variable "cd_bef_add" {
+  description = "Cooldown before adding instances"
+  type = number
+}

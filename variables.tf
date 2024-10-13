@@ -40,28 +40,28 @@ variable "availability_zone_b" {
 
 variable "vpc_name" {
   description = "Name of the VPC"
-  type = string
-  default = "kc-vpc-pf-bryan"
+  type        = string
+  default     = "kc-vpc-pf-bryan"
 }
 
 variable "gateway_name" {
   description = "Name of the gateway"
-  default = "kc-gw-pf-bryan"
+  default     = "kc-gw-pf-bryan"
 }
 
 variable "public_subnet_a_name" {
   description = "Name of the subnet a"
-  default = "kc-public-subnet-a-bryan"
+  default     = "kc-public-subnet-a-bryan"
 }
 
 variable "public_subnet_b_name" {
   description = "Name of the subnet b"
-  default = "kc-public-subnet-b-bryan"
+  default     = "kc-public-subnet-b-bryan"
 }
 
 variable "route_table_name" {
   description = "Name of the route table"
-  default = "kc-route-table-bryan"
+  default     = "kc-route-table-bryan"
 }
 
 # ECS Cluster variables
@@ -74,7 +74,7 @@ variable "ecs_cluster_name" {
 variable "ecs_instance_name" {
   description = "ECS instance name for the instances"
   type        = string
-  default = "kc-ecs-instance-bryan"
+  default     = "kc-ecs-instance-bryan"
 }
 
 variable "instance_type" {
@@ -99,6 +99,24 @@ variable "max_size" {
   description = "Maximum number of EC2 instances"
   type        = number
   default     = 3
+}
+
+# Utilización objetivo de la CPU
+variable "cpu_target" {
+  description = "Maximun CPU usage"
+  default     = 70
+}
+
+# Cooldown antes de reducir
+variable "cd_bef_red" {
+  description = "Cooldown before the reducition of the instances"
+  default     = 300
+}
+
+# Cooldown antes de escalar hacia arriba
+variable "cd_bef_add" {
+  description = "Cooldown before adding instances"
+  default     = 300
 }
 
 # ALB module variables
