@@ -13,8 +13,6 @@ Hacer una plantilla de Terraform que despliegüe:
 
 **Tips:** Se debe crear antes el **Task Definition** y para facilitar la práctica se hace en la **VPC Defaulft Pública**.  
 
-https://medium.com/@vladkens/aws-ecs-cluster-on-ec2-with-terraform-2023-fdb9f6b7db07  
-
 ## Despliegue de la plantilla.
 Para realizar el despliegue de la plantilla se ha hecho de manera modular, tambien se ha ido desarrollando paso a paso para verificar el funcionamiento de las partes por separado.  
 El esquema general del despliegue es el siguiente:  
@@ -497,5 +495,14 @@ En la practica se requiere generar un output con el endpoint de conexión, para 
 ![Outputs de terraform](/img/outputs_terraform.png)  
 
 En la imagen podemos observar la variable `alb_dns` que nos mostrará el servico `NGINX` en el navegador web
+## Mejoras futuras
+Las posibles mejorar para el proyecto son:
+- Obtimizar el código: Se podría modulizar aún mas le código, añadiendo nuevas plantillas como: `data.ft`, `provaider.ft`, etc. Estas plantilla se podrá implementar en todos los módulos.
+- Añadir nuevas plantillas para una implementación rápida y hacer cambios sin afectar a producción. Se podría hacer una plantilla para `test` y otra para `producción` por ejemplo.
+- Es posible agregar un nombre de dominio, certificado SSL, terminación HTTPS y enrutar tráfico entre diferentes servicios ECS.
 
-
+## Referencias
+Para el desarrollo del proyecto se usó como referencia los siguientes artículos y manuales:
+- [AWS ECS Cluster on EC2 with Terraform](https://medium.com/@vladkens/aws-ecs-cluster-on-ec2-with-terraform-2023-fdb9f6b7db07)
+- [How to Deploy an AWS ECS Cluster with Terraform](https://spacelift.io/blog/terraform-ecs)
+- [AWS Terraform Manual](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
